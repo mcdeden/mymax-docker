@@ -1,27 +1,17 @@
 version: '3.7'
 services:
-  
-  rabbitmq:
-    image: rabbitmq:3.8.2-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    restart: always
-    networks:
-      - dimix-network
-        
+
   configuration:
-    image: dimix/dimix-configuration-server:0.0.1-SNAPSHOT
+    image: mymax-configuration-service:0.0.1-SNAPSHOT
     container_name: configuration
     ports:
       - "8888:8888"
     restart: always   
     networks:
-      - dimix-network
-  
+      - mymax-network
+
   discovery:
-    image: dimix/dimix-discovery-server:0.0.1-SNAPSHOT
+    image: mymax-discovery-service:0.0.1-SNAPSHOT
     container_name: discovery
     ports:
       - "8787:8787"
@@ -33,13 +23,13 @@ services:
     depends_on:
       - configuration
     networks:
-      - dimix-network    
-  
+      - mymax-network    
+
   gateway:
-    image: dimix/dimix-gateway-server:0.0.1-SNAPSHOT
-    #container_name: gateway
+    image: mymax-gateway-service:0.0.1-SNAPSHOT
+    container_name: gateway
     ports:
-      - "8443-8445:8443"
+      - "8443:8443"
     restart: always
     environment:
       DISCOVERY_SERVER_NAME: discovery
@@ -49,11 +39,11 @@ services:
       - configuration
       - discovery
     networks:
-      - dimix-network
-  
-  authorization:
-    image: dimix/dimix-authorization-server:0.0.1-SNAPSHOT
-    container_name: authorization
+      - mymax-network
+
+  prospecting:
+    image: mymax-prospecting-service:0.0.1-SNAPSHOT
+    container_name: prospecting
     ports:
       - "8111:8111"
     restart: always
@@ -61,7 +51,7 @@ services:
       DISCOVERY_SERVER_NAME: discovery
       DISCOVERY_SERVER_PORT: 8787
       MYSQL_SERVER: host.docker.internal
-      MYSQL_DB_NAME: dimixdb
+      MYSQL_DB_NAME: mymaxdb
       MYSQL_USER: bybdbuser
       MYSQL_PWD: saudara123
       TZ: Asia/Jakarta
@@ -69,29 +59,49 @@ services:
       - configuration
       - discovery
     networks:
-      - dimix-network
-      
-  testing:
-    image: dimix/dimix-testing-service:0.0.1-SNAPSHOT
-    #container_name: submission
+      - mymax-network
+
+  progress:
+    image: mymax-progress-service:0.0.1-SNAPSHOT
+    container_name: progress
     ports:
-      - "9911-9915:9911"
+      - "8211:8211"
     restart: always
     environment:
       DISCOVERY_SERVER_NAME: discovery
       DISCOVERY_SERVER_PORT: 8787
+      MYSQL_SERVER: host.docker.internal
+      MYSQL_DB_NAME: mymaxdb
+      MYSQL_USER: bybdbuser
+      MYSQL_PWD: saudara123
       TZ: Asia/Jakarta
     depends_on:
       - configuration
       - discovery
     networks:
-      - dimix-network
-      
-  
-      
-  
-  
+      - mymax-network
+
+  comment:
+    image: mymax-comment-service:0.0.1-SNAPSHOT
+    container_name: comment
+    ports:
+      - "8311:8311"
+    restart: always
+    environment:
+      DISCOVERY_SERVER_NAME: discovery
+      DISCOVERY_SERVER_PORT: 8787
+      MYSQL_SERVER: host.docker.internal
+      MYSQL_DB_NAME: mymaxdb
+      MYSQL_USER: bybdbuser
+      MYSQL_PWD: saudara123
+      TZ: Asia/Jakarta
+    depends_on:
+      - configuration
+      - discovery
+    networks:
+      - mymax-network
+
 # Networks to be created to facilitate communication between containers
 networks:
-  dimix-network:
-    name: dimix-network
+  mymax-network:
+    name: mymax-network
